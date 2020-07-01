@@ -2,8 +2,10 @@
   "name": "rest-log",
   "version": "1.0.0",
   "description": "REST full API to fetch the content of log files.",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
+    "start:sec": "node src/secondary.js",
+    "start:sec:dev": "nodemon src/secondary.js --exec node src/secondary.js -e js,json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -13,6 +15,10 @@
   "author": "Luis Polasek <lpolasek@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "express": "^4.17.1",
     "fs-reverse": "git+https://github.com/dominictarr/fs-reverse.git"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
   }
 }

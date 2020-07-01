@@ -4,6 +4,8 @@
   "description": "REST full API to fetch the content of log files.",
   "main": "src/index.js",
   "scripts": {
+    "start": "node src/index.js",
+    "start:dev": "nodemon src/index.js --exec node src/index.js -e js,json",
     "start:pri": "node src/primary.js",
     "start:pri:dev": "nodemon src/primary.js --exec node src/primary.js -e js,json",
     "start:sec": "node src/secondary.js",

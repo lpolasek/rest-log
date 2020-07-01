@@ -1,0 +1,23 @@
+{
+    "primary": [{
+        "name": "PrimaryServer",
+        "port": 3000
+    }],
+    "secondary": [
+        {
+            "name": "SecondaryServerOne",
+            "port": 3001,
+            "log_path": "/var/log2"
+        },
+        {
+            "name": "SecondaryServerTwo",
+            "port": 3002,
+            "log_path": "/var/log"
+        },
+        {
+            "name": "SecondaryServerThree",
+            "port": 3003,
+            "log_path": "/var/log"
+        }
+    ]
+}

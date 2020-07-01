@@ -1,0 +1,142 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "REST Logs",
+    "version": "1.0.0",
+    "description": "API for retrieving log files"
+  },
+    "paths": {
+      "\/api\/hosts": {
+        "get": {
+            "summary": "Fetch availables hosts.",
+            "description": "",
+            "deprecated": false,
+            "parameters": [],
+            "responses": {
+                "200": {
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "type": "object",
+                          "properties": {
+                            "data": {
+                              "type": "object",
+                              "additionalProperties": {
+                                "type": "object",
+                                "additionalProperties": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "examples": {
+                          "data": {
+                            "summary": "Example of hosts available",
+                            "value": {
+                              "data": {
+                                "host1": "http://127.0.0.1:3000/api/logs/",
+                                "host2": "http://127.0.0.1:3001/api/logs/"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "description": "OK"
+                }
+            }
+        }
+    },
+    "\/api\/log/{fileName}/{lineCount}": {
+            "get": {
+                "summary": "Fetch the contents of several log files, line by line (reversed).",
+                "description": "",
+                "deprecated": false,
+                "parameters": [
+                  {
+                      "in": "path",
+                      "name": "fileName",
+                      "schema": {
+                        "type": "string"
+                      },
+                      "required": true,
+                      "description": "The filename of the log file."
+                  },
+                  {
+                    "in": "path",
+                    "name": "lineCount",
+                    "schema": {
+                      "type": "integer",
+                      "default": -1
+                    },
+                    "required": false,
+                    "description": "The number of lines to fetch (-1 fetches all lines)."
+                  },
+                  {
+                    "name": "filters",
+                    "required": false,
+                    "in": "query",
+                    "description": "A comma separated list of words, to filter the log file.", 
+                    "schema": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "name": "hosts",
+                    "required": false,
+                    "in": "query",
+                    "description": "A comma separated list of host names, where to fetch from.", 
+                    "schema": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                          "application/json": {
+                            "schema": {
+                              "type": "object",
+                              "properties": {
+                                "data": {
+                                  "type": "object",
+                                  "additionalProperties": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "examples": {
+                              "data": {
+                                "summary": "Example of a list of lines",
+                                "value": {
+                                  "data": {
+                                    "host1": {
+                                      "data": [
+                                        "172.17.0.1 - - [01/Jul/2020:16:19:47 +0000] 'POST /phpmyadmin/index.php HTTP/1.1' 200 1629",
+                                        "172.17.0.1 - - [01/Jul/2020:16:19:49 +0000] 'POST /phpmyadmin/index.php HTTP/1.1' 200 1629"
+                                      ],
+                                      "host2": {
+                                        "error": "connect ECONNREFUSED 127.0.0.1:3000"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}

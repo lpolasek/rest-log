@@ -1,0 +1,9 @@
+{
+    "name": "Primary server",
+    "port": 3001,
+    "hosts": {
+        "Secondary1": "http://127.0.0.1:3000/api/log/",
+        "Secondary2": "http://127.0.0.1:3002/api/log/",
+        "Secondary3": "http://127.0.0.1:3003/api/log/"
+    }
+}

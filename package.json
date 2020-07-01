@@ -4,6 +4,8 @@
   "description": "REST full API to fetch the content of log files.",
   "main": "src/index.js",
   "scripts": {
+    "start:pri": "node src/primary.js",
+    "start:pri:dev": "nodemon src/primary.js --exec node src/primary.js -e js,json",
     "start:sec": "node src/secondary.js",
     "start:sec:dev": "nodemon src/secondary.js --exec node src/secondary.js -e js,json",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,6 +17,7 @@
   "author": "Luis Polasek <lpolasek@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.19.2",
     "express": "^4.17.1",
     "fs-reverse": "git+https://github.com/dominictarr/fs-reverse.git"
   },

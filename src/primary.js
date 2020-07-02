@@ -1,5 +1,6 @@
 const axios = require('axios').default;
 const express = require('express');
+const path = require('path');
 
 function start(config) {
     const app = express();
@@ -21,7 +22,12 @@ function start(config) {
         // if no hosts are given, query all.
         let hosts = req.query.hosts ? req.query.hosts.split(',') : Object.keys(config.hosts);
 
-        let requests = hosts.map(host => axios.get(config.hosts[host] + params));
+        let requests = hosts.map((host) => {
+            if(! (host in config.hosts)) {
+                return Promise.reject({ message: `Host \'${host}\' not found in config.`});
+            }
+            return axios.get(config.hosts[host] + params);
+        });
         Promise.allSettled(requests)
         .then((results) => {
             let data = {};

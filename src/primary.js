@@ -1,8 +1,13 @@
+const { v4: uuidv4 } = require('uuid');
 const axios = require('axios').default;
 const express = require('express');
 const path = require('path');
 
+const TOKEN_NAME = 'x-rest-log-tokens';
+
 function start(config) {
+    let serverToken = uuidv4();
+
     const app = express();
     app.use('/doc', express.static('doc'));
     app.get('/', (req, res) => {
@@ -14,6 +19,18 @@ function start(config) {
     });
 
     app.get('/api/log/:filename/:lines(-?\\d+)?', (req, res) => {
+        tokens = JSON.parse(req.headers[TOKEN_NAME] || "[]");
+
+        // Check circular calls
+        if(tokens.includes(serverToken)) {
+            // Gretel, it seems we are walking in circles. ;)
+            res.status(400).send({ error: 'Circular calls detected!' });
+            return;
+        }
+
+        // Put out track
+        tokens.push(serverToken);
+
         // build the request parameters
         let params = req.params.filename + '/';
         params += req.params.lines !== undefined ? req.params.lines : '';
@@ -22,11 +39,15 @@ function start(config) {
         // if no hosts are given, query all.
         let hosts = req.query.hosts ? req.query.hosts.split(',') : Object.keys(config.hosts);
 
+        // configure axios_headers
+        let axios_config = { headers: {} };
+        axios_config.headers[TOKEN_NAME] = JSON.stringify(tokens);
+
         let requests = hosts.map((host) => {
             if(! (host in config.hosts)) {
                 return Promise.reject({ message: `Host \'${host}\' not found in config.`});
             }
-            return axios.get(config.hosts[host] + params);
+            return axios.get(config.hosts[host] + params, axios_config);
         });
         Promise.allSettled(requests)
         .then((results) => {
@@ -51,6 +72,7 @@ function start(config) {
 module.exports = start;
 
 if (require.main === module) {
-    const config = require('../config/primary_config');
+    let filename = process.argv[2] ? path.resolve(process.argv[2]) :  '../config/primary_config';
+    const config = require(filename);
     start(config);
 }

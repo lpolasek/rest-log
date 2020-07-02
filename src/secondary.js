@@ -37,6 +37,7 @@ function start(config) {
 module.exports = start;
 
 if (require.main === module) {
-    const config = require('../config/secondary_config');
+    let filename = process.argv[2] ? path.resolve(process.argv[2]) :  '../config/secondary_config';
+    const config = require(filename);
     start(config);
 }

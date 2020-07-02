@@ -22,6 +22,7 @@ REST API to fetch the content of log files.
     cp config/primary_config.json.sample config/primary_config.json
     cp config/secondary_config.json.sample config/secondary_config.json
     cp config/multi_config.json.sample config/multi_config.json
+    cp config/multi_config_circular.json.sample config/multi_config_circular.json
 
 Edit each of the config files to fulfill your requirements.
 
@@ -48,5 +49,9 @@ To easy the development, some npm scripts were added, *start(:pri|:sec)?:dev*, t
 - `start:dev` spawns a primary, and some secondary servers. The secondary servers are attached to the primary server.
  - `start:pri:dev` starts a primary.
  - `start:sec:dev` starts a secondary server.
+
+You can also try alternative configurations, giving the config filename as a command line parameter.
+
+    node src/index.js config/multi_config_circular.json
 
 All server instances, when accessed through the root URL, will bring up a *swagger-ui* page, that have the API documentation, and also has an API tester.

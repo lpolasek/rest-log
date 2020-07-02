@@ -1,6 +1,10 @@
+const path = require('path');
+
 const primary = require('./primary');
 const secondary = require('./secondary');
-const config = require('../config/multi_config');
+
+let filename = process.argv[2] ? path.resolve(process.argv[2]) :  '../config/multi_config';
+const config = require(filename);
 
 let sec_hosts = {};
 
@@ -10,6 +14,6 @@ config.secondary.forEach((sec_conf) => {
 });
 
 config.primary.forEach((pri_conf) => {
-    pri_conf.hosts = sec_hosts;
+    pri_conf.hosts = { ...pri_conf.hosts, ...sec_hosts };
     primary(pri_conf);
 });

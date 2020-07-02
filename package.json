@@ -5,11 +5,11 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "start:dev": "nodemon src/index.js --exec node src/index.js -e js,json",
+    "start:dev": "nodemon -e js,json src/index.js",
     "start:pri": "node src/primary.js",
-    "start:pri:dev": "nodemon src/primary.js --exec node src/primary.js -e js,json",
+    "start:pri:dev": "nodemon -e js,json src/primary.js",
     "start:sec": "node src/secondary.js",
-    "start:sec:dev": "nodemon src/secondary.js --exec node src/secondary.js -e js,json",
+    "start:sec:dev": "nodemon -e js,json src/secondary.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -21,7 +21,8 @@
   "dependencies": {
     "axios": "^0.19.2",
     "express": "^4.17.1",
-    "fs-reverse": "git+https://github.com/dominictarr/fs-reverse.git"
+    "fs-reverse": "git+https://github.com/dominictarr/fs-reverse.git",
+    "uuid": "^8.2.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"

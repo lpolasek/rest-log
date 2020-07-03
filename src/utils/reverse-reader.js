@@ -48,16 +48,19 @@ ReverseReader.prototype.nextLine = async function(finish) {
 
     // if begin < 1, we need to save the end of the following line
     // and load the next (previous) chunk
-    if(begin < 0) {
+    if(begin <= 0) {
         this.reminder = this.data.slice(0, end+1);
         await this.updateBuffer();
         if(this.data.length == 0 ) {
             return this.reminder;
         }
-        end = this.bufferPosition;
-        begin = this.data.lastIndexOf(this.SEPATATOR, end);
-        this.bufferPosition = begin - 1;
-        line = this.data.slice(begin+1, end+1) + this.reminder;
+
+        if(begin < 0) {
+            end = this.bufferPosition;
+            begin = this.data.lastIndexOf(this.SEPATATOR, end);
+            this.bufferPosition = begin - 1;
+            line = this.data.slice(begin+1, end+1) + this.reminder;
+        }
     } else {
         line = this.data.slice(begin+1, end+1);
     }

@@ -21,7 +21,6 @@
   "dependencies": {
     "axios": "^0.19.2",
     "express": "^4.17.1",
-    "fs-reverse": "git+https://github.com/dominictarr/fs-reverse.git",
     "uuid": "^8.2.0"
   },
   "devDependencies": {

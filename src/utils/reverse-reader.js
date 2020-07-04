@@ -14,6 +14,9 @@ ReverseReader.prototype.init =  async function(filename) {
     this.bufferPosition = -1; // the position of the last line found
 
     await this.updateBuffer();
+    if(this.data[this.bufferPosition] === this.SEPATATOR) {
+        this.bufferPosition--;
+    }
 }
 
 ReverseReader.prototype.updateBuffer = async function() {
@@ -24,7 +27,7 @@ ReverseReader.prototype.updateBuffer = async function() {
     }
     let result = await this.fd.read(this.buffer, 0, this.CHUNK_SIZE, this.chunkPosition * this.CHUNK_SIZE);
     this.data = this.buffer.slice(0, result.bytesRead).toString();
-    this.bufferPosition = result.bytesRead - 1;
+    this.bufferPosition = this.data.length - 1;
     this.chunkPosition--;
 }
 

@@ -48,7 +48,7 @@ ReverseReader.prototype.begin = function(filename) {
             });
         });
     })
-    .catch(this.sendError);
+    .catch(this.sendError.bind(this));
 }
 
 ReverseReader.prototype.stop =  function() {
@@ -110,7 +110,7 @@ ReverseReader.prototype.nextLine = function() {
             }
             this.sendLine(line);
         })
-        .catch(this.sendError);
+        .catch(this.sendError.bind(this));
     } else {
         line = this.data.slice(begin+1, end+1)
         this.sendLine(line);

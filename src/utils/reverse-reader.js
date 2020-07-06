@@ -1,46 +1,88 @@
+var events = require('events');
 var fs = require('fs').promises;
 
-var ReverseReader = function() {}
+var ReverseReader = function() {
+    this.eventEmitter = new events.EventEmitter();
+}
 
-ReverseReader.prototype.init =  async function(filename) {
+ReverseReader.prototype.emit = function(eventName, ...args) {
+    return this.eventEmitter.emit(eventName, ...args);
+}
+
+
+ReverseReader.prototype.on = function(eventName, listener) {
+    return this.eventEmitter.on(eventName, listener);
+}
+
+
+ReverseReader.prototype.sendError = function(error) {
+    this.emit('error', error);
+}
+
+ReverseReader.prototype.sendLine = function(line) {
+    this.emit('line', line);
+    process.nextTick(this.nextLine.bind(this));
+}
+
+ReverseReader.prototype.begin = function(filename) {
     this.SEPATATOR = '\n';
     this.CHUNK_SIZE = 128 * 1024;
     this.buffer = Buffer.alloc(this.CHUNK_SIZE);
 
-    this.fd = await fs.open(filename, 'r');
-    const fileStat = await fs.stat(filename);
-    this.chunks = Math.ceil(fileStat.size / this.CHUNK_SIZE); // how many blocks to fetch in total
-    this.chunkPosition = this.chunks - 1; // the block # to be read
-    this.bufferPosition = -1; // the position of the last line found
+    fs.open(filename, 'r')
+    .then((fd) => {
+        this.fd = fd;
+        fs.stat(filename)
+        .then((fileStat) => {
+            this.running = true;
+            this.chunks = Math.ceil(fileStat.size / this.CHUNK_SIZE); // how many blocks to fetch in total
+            this.chunkPosition = this.chunks - 1; // the block # to be read
+            this.bufferPosition = -1; // the position of the last line found
 
-    await this.updateBuffer();
-    if(this.data[this.bufferPosition] === this.SEPATATOR) {
-        this.bufferPosition--;
+            this.updateBuffer()
+            .then(() => {
+                if(this.data[this.bufferPosition] === this.SEPATATOR) {
+                    this.bufferPosition--;
+                }
+                this.nextLine();
+            });
+        });
+    })
+    .catch(this.sendError);
+}
+
+ReverseReader.prototype.stop =  function() {
+    if(this.running) {
+        this.running = false;
+        return this.fd.close()
+        .then(() => {
+            this.emit('end');
+        });
     }
 }
 
-ReverseReader.prototype.updateBuffer = async function() {
+ReverseReader.prototype.updateBuffer = function() {
+    if(!this.running) {
+        return Promise.resolve(false);
+    }
     if(this.chunkPosition < 0) {
-        this.data = '';
-        await this.fd.close();
-        return;
+        this.stop();
+        return Promise.resolve(false);;
     }
-    let result = await this.fd.read(this.buffer, 0, this.CHUNK_SIZE, this.chunkPosition * this.CHUNK_SIZE);
-    this.data = this.buffer.slice(0, result.bytesRead).toString();
-    this.bufferPosition = this.data.length - 1;
-    this.chunkPosition--;
+
+    return this.fd.read(this.buffer, 0, this.CHUNK_SIZE, this.chunkPosition * this.CHUNK_SIZE)
+    .then((result) => {
+        this.data = this.buffer.slice(0, result.bytesRead).toString();
+        this.bufferPosition = this.data.length - 1;
+        this.chunkPosition--;
+    });
 }
 
-ReverseReader.prototype.nextLine = async function(finish) {
-    if(finish) {
-        await this.fd.close();
-        return null;
-    }
-
+ReverseReader.prototype.nextLine = function() {
     // bufferPosition should never be below 0,
     // because it is updated on updateBuffer()
-    if(this.bufferPosition < 0) {
-        return null;
+    if((!this.running) || (this.bufferPosition < 0)) {
+        return;
     }
 
     let end = this.bufferPosition;
@@ -53,23 +95,26 @@ ReverseReader.prototype.nextLine = async function(finish) {
     if(begin <= 0) {
         // It could happen that the first element is a SEPATATOR :(
         line = this.data.slice(this.data[0] === this.SEPATATOR ? 1 : 0, end+1);
-        await this.updateBuffer();
-        if(this.data.length == 0 ) {
-            return line;
-        }
+        this.updateBuffer()
+        .then(() => {
+            if(!this.running) {
+                this.sendLine(line);
+                return;
+            }
 
-        if(begin < 0) {
-            end = this.bufferPosition;
-            begin = this.data.lastIndexOf(this.SEPATATOR, end);
-            this.bufferPosition = begin - 1;
-            line = this.data.slice(begin+1, end+1) + line;
-        }
+            if(begin < 0) {
+                end = this.bufferPosition;
+                begin = this.data.lastIndexOf(this.SEPATATOR, end);
+                this.bufferPosition = begin - 1;
+                line = this.data.slice(begin+1, end+1) + line;
+            }
+            this.sendLine(line);
+        })
+        .catch(this.sendError);
     } else {
-        line = this.data.slice(begin+1, end+1);
+        line = this.data.slice(begin+1, end+1)
+        this.sendLine(line);
     }
-
-    return line;
-
 }
 
 module.exports = ReverseReader;

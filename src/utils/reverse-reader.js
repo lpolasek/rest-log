@@ -32,14 +32,14 @@ ReverseReader.prototype.begin = function(filename) {
     fs.open(filename, 'r')
     .then((fd) => {
         this.fd = fd;
-        fs.stat(filename)
+        return fs.stat(filename)
         .then((fileStat) => {
             this.running = true;
             this.chunks = Math.ceil(fileStat.size / this.CHUNK_SIZE); // how many blocks to fetch in total
             this.chunkPosition = this.chunks - 1; // the block # to be read
             this.bufferPosition = -1; // the position of the last line found
 
-            this.updateBuffer()
+            return this.updateBuffer()
             .then(() => {
                 if(this.data[this.bufferPosition] === this.SEPATATOR) {
                     this.bufferPosition--;
